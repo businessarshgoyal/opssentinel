@@ -1,0 +1,11 @@
+# Copy to ~/.snowflake/connections.toml and fill in your account details.
+# Browser based OAuth is recommended so no password is stored on disk.
+
+[opssentinel]
+account                           = "<ACCOUNT_IDENTIFIER>"
+user                              = "<USERNAME>"
+authenticator                     = "OAUTH_AUTHORIZATION_CODE"
+client_store_temporary_credential = true
+role                              = "OPSSENTINEL_ROLE"
+warehouse                         = "OPSSENTINEL_WH"
+database                          = "OPSSENTINEL"

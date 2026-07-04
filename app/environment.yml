@@ -1,0 +1,7 @@
+name: opssentinel-streamlit
+channels:
+  - snowflake
+dependencies:
+  - streamlit
+  - snowflake-snowpark-python
+  - pandas
