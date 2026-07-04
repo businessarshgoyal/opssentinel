@@ -36,7 +36,7 @@ COPY INTO DOCUMENTS
   )
   ON_ERROR = ABORT_STATEMENT;
 
-SELECT doc_type, COUNT(*) AS rows
+SELECT doc_type, COUNT(*) AS row_count
 FROM DOCUMENTS
 GROUP BY doc_type
-ORDER BY rows DESC;
+ORDER BY row_count DESC;

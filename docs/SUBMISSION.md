@@ -50,6 +50,17 @@ a demo script, and this rubric mapping.
 - Model names are centralized in `APP.SENTINEL_CONFIG` and in the agent spec so
   they can be swapped for whatever models a given account has enabled.
 
+## Live verification
+
+The structured layer and the anomaly detection engine were deployed and verified
+on a live Snowflake account. All four seeded anomalies surfaced as expected:
+TransArc carrier delays (4.95x baseline late rate), the Citrus Dish Soap demand
+spike (2.47x), West Regional DC cost drift (2.07x), and Citrus Dish Soap stockout
+risk. The Cortex AI layer (COMPLETE, SENTIMENT, AI_CLASSIFY, EMBED_TEXT, and
+therefore Cortex Search and the agent) requires a non trial Snowflake account,
+since Snowflake disables these functions on 30 day trials. On any account with
+Cortex enabled, the full stack deploys unchanged with `scripts/deploy.sh`.
+
 ## Constraints honored
 
 No em dashes appear anywhere in code, comments, SQL, or documentation. This is

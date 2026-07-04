@@ -9,6 +9,9 @@ USE WAREHOUSE OPSSENTINEL_WH;
 USE DATABASE OPSSENTINEL;
 USE SCHEMA APP;
 
+-- Note: the reference date CTE is named refd because a shorter name collides
+-- with the reserved ASOF join keyword.
+
 -- Reference date derived from the data itself so results stay stable.
 CREATE OR REPLACE VIEW APP.AS_OF AS
 SELECT MAX(order_date) AS as_of_date FROM OPSSENTINEL.CORE.ORDERS;
@@ -18,17 +21,17 @@ CREATE OR REPLACE DYNAMIC TABLE APP.DEMAND_ANOMALIES
   TARGET_LAG = '1 hour'
   WAREHOUSE = OPSSENTINEL_WH
   AS
-WITH asof AS (SELECT as_of_date FROM APP.AS_OF),
+WITH refd AS (SELECT as_of_date FROM APP.AS_OF),
 recent AS (
   SELECT o.product_id, AVG(o.quantity) AS recent_avg
-  FROM OPSSENTINEL.CORE.ORDERS o, asof
-  WHERE o.order_date > asof.as_of_date - 7
+  FROM OPSSENTINEL.CORE.ORDERS o, refd
+  WHERE o.order_date > refd.as_of_date - 7
   GROUP BY o.product_id
 ),
 baseline AS (
   SELECT o.product_id, AVG(o.quantity) AS base_avg
-  FROM OPSSENTINEL.CORE.ORDERS o, asof
-  WHERE o.order_date BETWEEN asof.as_of_date - 49 AND asof.as_of_date - 8
+  FROM OPSSENTINEL.CORE.ORDERS o, refd
+  WHERE o.order_date BETWEEN refd.as_of_date - 49 AND refd.as_of_date - 8
   GROUP BY o.product_id
 )
 SELECT
@@ -55,17 +58,17 @@ CREATE OR REPLACE DYNAMIC TABLE APP.CARRIER_ANOMALIES
   TARGET_LAG = '1 hour'
   WAREHOUSE = OPSSENTINEL_WH
   AS
-WITH asof AS (SELECT as_of_date FROM APP.AS_OF),
+WITH refd AS (SELECT as_of_date FROM APP.AS_OF),
 recent AS (
   SELECT s.carrier, AVG(IFF(s.late_days > 0, 1, 0)) AS recent_late
-  FROM OPSSENTINEL.CORE.SHIPMENTS s, asof
-  WHERE s.promised_date > asof.as_of_date - 14
+  FROM OPSSENTINEL.CORE.SHIPMENTS s, refd
+  WHERE s.promised_date > refd.as_of_date - 14
   GROUP BY s.carrier
 ),
 baseline AS (
   SELECT s.carrier, AVG(IFF(s.late_days > 0, 1, 0)) AS base_late
-  FROM OPSSENTINEL.CORE.SHIPMENTS s, asof
-  WHERE s.promised_date BETWEEN asof.as_of_date - 90 AND asof.as_of_date - 15
+  FROM OPSSENTINEL.CORE.SHIPMENTS s, refd
+  WHERE s.promised_date BETWEEN refd.as_of_date - 90 AND refd.as_of_date - 15
   GROUP BY s.carrier
 )
 SELECT
@@ -92,12 +95,12 @@ CREATE OR REPLACE DYNAMIC TABLE APP.INVENTORY_ANOMALIES
   TARGET_LAG = '1 hour'
   WAREHOUSE = OPSSENTINEL_WH
   AS
-WITH asof AS (SELECT as_of_date FROM APP.AS_OF),
+WITH refd AS (SELECT as_of_date FROM APP.AS_OF),
 latest AS (
   SELECT i.product_id, i.dc_id, i.on_hand_units, i.reorder_point,
          ROW_NUMBER() OVER (PARTITION BY i.product_id, i.dc_id ORDER BY i.snapshot_date DESC) AS rn
-  FROM OPSSENTINEL.CORE.INVENTORY i, asof
-  WHERE i.snapshot_date <= asof.as_of_date
+  FROM OPSSENTINEL.CORE.INVENTORY i, refd
+  WHERE i.snapshot_date <= refd.as_of_date
 )
 SELECT
   'stockout_risk' AS anomaly_type,
@@ -123,17 +126,17 @@ CREATE OR REPLACE DYNAMIC TABLE APP.COST_ANOMALIES
   TARGET_LAG = '1 hour'
   WAREHOUSE = OPSSENTINEL_WH
   AS
-WITH asof AS (SELECT as_of_date FROM APP.AS_OF),
+WITH refd AS (SELECT as_of_date FROM APP.AS_OF),
 recent AS (
   SELECT w.dc_id, AVG(w.compute_credits) AS recent_avg
-  FROM OPSSENTINEL.CORE.WAREHOUSE_SPEND w, asof
-  WHERE w.usage_date > asof.as_of_date - 10
+  FROM OPSSENTINEL.CORE.WAREHOUSE_SPEND w, refd
+  WHERE w.usage_date > refd.as_of_date - 10
   GROUP BY w.dc_id
 ),
 baseline AS (
   SELECT w.dc_id, AVG(w.compute_credits) AS base_avg
-  FROM OPSSENTINEL.CORE.WAREHOUSE_SPEND w, asof
-  WHERE w.usage_date BETWEEN asof.as_of_date - 70 AND asof.as_of_date - 11
+  FROM OPSSENTINEL.CORE.WAREHOUSE_SPEND w, refd
+  WHERE w.usage_date BETWEEN refd.as_of_date - 70 AND refd.as_of_date - 11
   GROUP BY w.dc_id
 )
 SELECT

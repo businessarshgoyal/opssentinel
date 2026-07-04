@@ -60,7 +60,7 @@ COPY INTO WAREHOUSE_SPEND
   ON_ERROR = ABORT_STATEMENT;
 
 -- Quick sanity counts so the deploy log shows the load succeeded.
-SELECT 'suppliers' AS table_name, COUNT(*) AS rows FROM SUPPLIERS
+SELECT 'suppliers' AS table_name, COUNT(*) AS row_count FROM SUPPLIERS
 UNION ALL SELECT 'products', COUNT(*) FROM PRODUCTS
 UNION ALL SELECT 'warehouses', COUNT(*) FROM WAREHOUSES
 UNION ALL SELECT 'inventory', COUNT(*) FROM INVENTORY
