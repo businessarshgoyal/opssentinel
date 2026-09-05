@@ -1,0 +1,9 @@
+{
+  "comment": "Reference Cortex Code settings for OpsSentinel. Copy to ~/.snowflake/cortex/settings.json.",
+  "enableMemory": true,
+  "autoAcceptPlans": false,
+  "autoUpdate": false,
+  "agentMode": "standard",
+  "sqlDefaultTimeoutSeconds": 300,
+  "diffDisplayMode": "unified"
+}

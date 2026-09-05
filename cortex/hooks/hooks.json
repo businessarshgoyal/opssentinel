@@ -1,0 +1,15 @@
+{
+  "comment": "Copy this into ~/.snowflake/cortex/hooks/hooks.json and adjust the absolute paths, or point CoCo at this repo. Hooks fire on Cortex Code lifecycle events.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "command": "python3 ./cortex/hooks/session_start.py"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "command": "python3 ./cortex/hooks/pre_tool_use.py"
+      }
+    ]
+  }
+}

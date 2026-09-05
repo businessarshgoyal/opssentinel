@@ -1,0 +1,69 @@
+-- OpsSentinel: load structured data from the internal stage.
+-- The deploy script uploads the CSV files with PUT before this runs. If you
+-- prefer to run interactively, execute the PUT lines below from the Snowflake
+-- CLI (they cannot run from a worksheet because PUT is a client side command).
+
+USE ROLE OPSSENTINEL_ROLE;
+USE WAREHOUSE OPSSENTINEL_WH;
+USE DATABASE OPSSENTINEL;
+USE SCHEMA CORE;
+
+-- PUT file://data/generated/suppliers.csv        @CORE.RAW_STAGE AUTO_COMPRESS=TRUE OVERWRITE=TRUE;
+-- PUT file://data/generated/products.csv          @CORE.RAW_STAGE AUTO_COMPRESS=TRUE OVERWRITE=TRUE;
+-- PUT file://data/generated/warehouses.csv        @CORE.RAW_STAGE AUTO_COMPRESS=TRUE OVERWRITE=TRUE;
+-- PUT file://data/generated/inventory.csv         @CORE.RAW_STAGE AUTO_COMPRESS=TRUE OVERWRITE=TRUE;
+-- PUT file://data/generated/orders.csv            @CORE.RAW_STAGE AUTO_COMPRESS=TRUE OVERWRITE=TRUE;
+-- PUT file://data/generated/shipments.csv         @CORE.RAW_STAGE AUTO_COMPRESS=TRUE OVERWRITE=TRUE;
+-- PUT file://data/generated/warehouse_spend.csv   @CORE.RAW_STAGE AUTO_COMPRESS=TRUE OVERWRITE=TRUE;
+-- PUT file://data/generated/documents.jsonl       @CORE.RAW_STAGE AUTO_COMPRESS=TRUE OVERWRITE=TRUE;
+
+COPY INTO SUPPLIERS
+  FROM @CORE.RAW_STAGE/suppliers.csv.gz
+  FILE_FORMAT = (FORMAT_NAME = CORE.CSV_FORMAT)
+  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+  ON_ERROR = ABORT_STATEMENT;
+
+COPY INTO PRODUCTS
+  FROM @CORE.RAW_STAGE/products.csv.gz
+  FILE_FORMAT = (FORMAT_NAME = CORE.CSV_FORMAT)
+  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+  ON_ERROR = ABORT_STATEMENT;
+
+COPY INTO WAREHOUSES
+  FROM @CORE.RAW_STAGE/warehouses.csv.gz
+  FILE_FORMAT = (FORMAT_NAME = CORE.CSV_FORMAT)
+  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+  ON_ERROR = ABORT_STATEMENT;
+
+COPY INTO INVENTORY
+  FROM @CORE.RAW_STAGE/inventory.csv.gz
+  FILE_FORMAT = (FORMAT_NAME = CORE.CSV_FORMAT)
+  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+  ON_ERROR = ABORT_STATEMENT;
+
+COPY INTO ORDERS
+  FROM @CORE.RAW_STAGE/orders.csv.gz
+  FILE_FORMAT = (FORMAT_NAME = CORE.CSV_FORMAT)
+  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+  ON_ERROR = ABORT_STATEMENT;
+
+COPY INTO SHIPMENTS
+  FROM @CORE.RAW_STAGE/shipments.csv.gz
+  FILE_FORMAT = (FORMAT_NAME = CORE.CSV_FORMAT)
+  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+  ON_ERROR = ABORT_STATEMENT;
+
+COPY INTO WAREHOUSE_SPEND
+  FROM @CORE.RAW_STAGE/warehouse_spend.csv.gz
+  FILE_FORMAT = (FORMAT_NAME = CORE.CSV_FORMAT)
+  MATCH_BY_COLUMN_NAME = CASE_INSENSITIVE
+  ON_ERROR = ABORT_STATEMENT;
+
+-- Quick sanity counts so the deploy log shows the load succeeded.
+SELECT 'suppliers' AS table_name, COUNT(*) AS row_count FROM SUPPLIERS
+UNION ALL SELECT 'products', COUNT(*) FROM PRODUCTS
+UNION ALL SELECT 'warehouses', COUNT(*) FROM WAREHOUSES
+UNION ALL SELECT 'inventory', COUNT(*) FROM INVENTORY
+UNION ALL SELECT 'orders', COUNT(*) FROM ORDERS
+UNION ALL SELECT 'shipments', COUNT(*) FROM SHIPMENTS
+UNION ALL SELECT 'warehouse_spend', COUNT(*) FROM WAREHOUSE_SPEND;
